@@ -54,10 +54,10 @@ body {
 .date-nav {
   position: absolute;
   top: 295px;
-  left: 815px;
+  left: 842px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .date-nav-btn {
@@ -90,8 +90,7 @@ body {
   font-family: 'Galmuri11', sans-serif;
   font-size: 15px;
   color: #000;
-  min-width: 130px;
-  text-align: center;
+  white-space: nowrap;
 }
 
 /* =============================================
