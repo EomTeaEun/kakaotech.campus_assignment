@@ -35,6 +35,7 @@ const addTodoBtn     = document.getElementById('addTodoBtn');
 const todoModal      = document.getElementById('todoModal');
 const slotTooltip    = document.getElementById('slotTooltip');
 const filterTabs     = document.getElementById('filterTabs');
+const modalButtons   = document.querySelector('.todo-modal-buttons');
 
 // 모달 필드
 const titleInput     = document.getElementById('todoTitle');
@@ -292,6 +293,11 @@ function updateModalButtons() {
     btnDelete.style.display   = 'flex';
     btnComplete.style.display = 'flex';
   }
+
+  // 보이는 버튼이 2개일 때 two-btn 클래스 적용
+  const visibleCount = [btnConfirm, btnClose, btnEdit, btnDelete, btnComplete]
+    .filter(btn => btn.style.display === 'flex').length;
+  modalButtons.classList.toggle('two-btn', visibleCount === 2);
 }
 
 // ─── 모달 열기/닫기 ─────────────────────────────
