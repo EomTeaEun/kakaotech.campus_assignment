@@ -48,6 +48,53 @@ body {
 }
 
 /* =============================================
+   날짜 네비게이션
+   추가 버튼(top:338, left:840, w:200) 바로 위에 중앙 정렬
+   ============================================= */
+.date-nav {
+  position: absolute;
+  top: 295px;
+  left: 815px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-nav-btn {
+  position: relative;
+  width: 36px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-nav-btn-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: fill;
+}
+
+.date-nav-btn-label {
+  position: relative;
+  z-index: 1;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 14px;
+  color: #000;
+  pointer-events: none;
+}
+
+.date-text {
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 15px;
+  color: #000;
+  min-width: 130px;
+  text-align: center;
+}
+
+/* =============================================
    TODO 추가 버튼
    ============================================= */
 .add-todo-wrapper {

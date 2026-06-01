@@ -23,6 +23,10 @@ let todos = [];
 // ─── 업적 알림 상태 ──────────────────────────────
 let activeAchievements = [];
 
+// ─── 날짜 뷰 상태 ────────────────────────────────
+let currentViewDate = new Date();
+currentViewDate.setHours(0, 0, 0, 0);
+
 // ─── 필터 / 모달 상태 ───────────────────────────
 let currentFilter = 'all';   // 'all' | 'active' | 'done'
 let modalMode     = 'add';   // 'add' | 'edit' | 'done-view'
@@ -30,6 +34,7 @@ let currentTodoId = null;
 let isEditingText = false;   // edit 모드에서 수정 버튼 눌렀는지
 
 // ─── DOM 캐싱 ────────────────────────────────────
+// (날짜 관련 DOM은 하단 이벤트 바인딩 섹션에서 캐싱)
 const inventoryGrid  = document.getElementById('inventoryGrid');
 const addTodoBtn     = document.getElementById('addTodoBtn');
 const todoModal      = document.getElementById('todoModal');
@@ -57,10 +62,33 @@ function getRandomItemImage() {
   return ITEM_IMAGES[Math.floor(Math.random() * ITEM_IMAGES.length)];
 }
 
-/* 활성 todo가 없는 첫 번째 빈 슬롯 번호 반환 (-1: 전부 사용 중) */
+/* Date → "2025-06-01" 형식 문자열 */
+function getDateString(date) {
+  return date.toISOString().split('T')[0];
+}
+
+/* Date → "2025년 6월 1일" 한국어 표기 */
+function getKoreanDateString(date) {
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
+
+/* Todo의 날짜 키 반환 (전체 ISO 문자열 및 날짜만 있는 포맷 모두 대응) */
+function getTodoDateKey(todo) {
+  return todo.createdAt.split('T')[0];
+}
+
+/* 날짜 표시 갱신 */
+function updateDateDisplay() {
+  document.getElementById('dateText').textContent = getKoreanDateString(currentViewDate);
+}
+
+/* 현재 날짜 기준 활성 todo가 없는 첫 번째 빈 슬롯 번호 반환 (-1: 전부 사용 중) */
 function getFirstEmptySlotIndex() {
+  const todayKey = getDateString(currentViewDate);
   const occupied = new Set(
-    todos.filter(t => t.status === 'active').map(t => t.slotIndex)
+    todos
+      .filter(t => t.status === 'active' && getTodoDateKey(t) === todayKey)
+      .map(t => t.slotIndex)
   );
   for (let i = 0; i < MAX_SLOTS; i++) {
     if (!occupied.has(i)) return i;
@@ -155,17 +183,18 @@ function setFilter(filter) {
 function renderSlots() {
   const slots = inventoryGrid.querySelectorAll('.inventory-slot');
 
-  // 모든 슬롯 초기화
   slots.forEach(slot => {
     slot.innerHTML = '';
     slot.classList.remove('occupied', 'done-item');
     delete slot.dataset.todoId;
   });
 
+  // 현재 선택된 날짜의 todo만 대상으로 함
+  const todayKey  = getDateString(currentViewDate);
+  const dayTodos  = todos.filter(t => getTodoDateKey(t) === todayKey);
+
   if (currentFilter === 'done') {
-    // 완료 탭: done 상태 todo를 순서대로 슬롯에 배치 (흑백)
-    const doneTodos = todos.filter(t => t.status === 'done');
-    doneTodos.forEach((todo, i) => {
+    dayTodos.filter(t => t.status === 'done').forEach((todo, i) => {
       const slot = slots[i];
       if (!slot) return;
 
@@ -179,21 +208,18 @@ function renderSlots() {
       slot.appendChild(img);
     });
   } else {
-    // 전체 / 진행중 탭: active 상태 todo만 원래 슬롯 위치에 배치
-    todos
-      .filter(t => t.status === 'active')
-      .forEach(todo => {
-        const slot = slots[todo.slotIndex];
-        if (!slot) return;
+    dayTodos.filter(t => t.status === 'active').forEach(todo => {
+      const slot = slots[todo.slotIndex];
+      if (!slot) return;
 
-        slot.classList.add('occupied');
+      slot.classList.add('occupied');
 
-        const img = document.createElement('img');
-        img.src = `assets/items/${todo.itemImage}`;
-        img.alt = todo.text;
-        img.className = 'slot-item-img';
-        slot.appendChild(img);
-      });
+      const img = document.createElement('img');
+      img.src = `assets/items/${todo.itemImage}`;
+      img.alt = todo.text;
+      img.className = 'slot-item-img';
+      slot.appendChild(img);
+    });
   }
 }
 
@@ -219,9 +245,10 @@ inventoryGrid.addEventListener('mousemove', (e) => {
       const todoId = parseInt(slot.dataset.todoId);
       todo = todos.find(t => t.id === todoId);
     } else {
-      // 진행중/전체 탭: slotIndex로 조회
-      const idx = parseInt(slot.dataset.slotIndex);
-      todo = todos.find(t => t.slotIndex === idx && t.status === 'active');
+      // 진행중/전체 탭: slotIndex + 날짜로 조회
+      const idx      = parseInt(slot.dataset.slotIndex);
+      const todayKey = getDateString(currentViewDate);
+      todo = todos.find(t => t.slotIndex === idx && t.status === 'active' && getTodoDateKey(t) === todayKey);
     }
 
     if (!todo) return;
@@ -372,7 +399,7 @@ function addTodo() {
     status:    'active',
     itemImage: getRandomItemImage(),
     slotIndex,
-    createdAt: new Date().toISOString()
+    createdAt: getDateString(currentViewDate)
   });
 
   // 완료 탭에서 추가하면 진행중 탭으로 전환
@@ -466,9 +493,10 @@ inventoryGrid.addEventListener('click', (e) => {
     const todoId = parseInt(slot.dataset.todoId);
     openModal('done-view', todoId);
   } else {
-    // 진행중/전체 탭의 슬롯: edit 모달
-    const idx  = parseInt(slot.dataset.slotIndex);
-    const todo = todos.find(t => t.slotIndex === idx && t.status === 'active');
+    // 진행중/전체 탭의 슬롯: edit 모달 (날짜 필터 포함)
+    const idx      = parseInt(slot.dataset.slotIndex);
+    const todayKey = getDateString(currentViewDate);
+    const todo     = todos.find(t => t.slotIndex === idx && t.status === 'active' && getTodoDateKey(t) === todayKey);
     if (!todo) return;
     openModal('edit', todo.id);
   }
@@ -489,5 +517,20 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();
 });
 
+// ─── 날짜 네비게이션 이벤트 ──────────────────────
+
+document.getElementById('datePrev').addEventListener('click', () => {
+  currentViewDate.setDate(currentViewDate.getDate() - 1);
+  updateDateDisplay();
+  renderSlots();
+});
+
+document.getElementById('dateNext').addEventListener('click', () => {
+  currentViewDate.setDate(currentViewDate.getDate() + 1);
+  updateDateDisplay();
+  renderSlots();
+});
+
 // ─── 초기화 ─────────────────────────────────────
+updateDateDisplay();
 renderSlots();
