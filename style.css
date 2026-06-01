@@ -356,11 +356,18 @@ body {
 }
 
 /* =============================================
-   모달 하단 버튼 4개
+   모달 하단 버튼 — 책 안쪽 하단에 절대 위치
+   책(588×722px) 기준: 슬라이더 하단(~400px) 아래 여백 활용
    ============================================= */
 .todo-modal-buttons {
+  position: absolute;
+  bottom: 56px;
+  left: 85px;
+  width: 420px;
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 .modal-btn-wrapper {
@@ -404,4 +411,84 @@ body {
   border: 2px solid #888;
   z-index: 200;
   white-space: nowrap;
+}
+
+/* =============================================
+   업적 알림 바
+   ============================================= */
+.achieve-bar {
+  position: fixed;
+  right: 20px;
+  width: 360px;
+  z-index: 300;
+  transform: translateX(calc(100% + 20px));
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              top 0.2s ease;
+}
+
+.achieve-bar.slide-in {
+  transform: translateX(0);
+}
+
+.achieve-bar.slide-out {
+  transform: translateX(calc(100% + 20px));
+}
+
+.achieve-bar-inner {
+  position: relative;
+}
+
+.achieve-bar-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.achieve-bar-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+}
+
+.achieve-item-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.achieve-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.achieve-title {
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 11px;
+  color: #FFFF55;
+  text-shadow: 2px 2px 0 #3f3f00;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.achieve-detail {
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 2px 2px 0 #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

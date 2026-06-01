@@ -11,9 +11,17 @@ const ITEM_IMAGES = [
 ];
 
 const MAX_SLOTS = 27;
+const MAX_ACHIEVEMENTS = 3;
+const ACHIEVE_WIDTH    = 360;
+const ACHIEVE_HEIGHT   = Math.round(ACHIEVE_WIDTH * 418 / 2144); // ≈ 70px
+const ACHIEVE_GAP      = 8;
+const ACHIEVE_TOP_BASE = 20;
 
 // ─── Todo 저장소 ────────────────────────────────
 let todos = [];
+
+// ─── 업적 알림 상태 ──────────────────────────────
+let activeAchievements = [];
 
 // ─── 필터 / 모달 상태 ───────────────────────────
 let currentFilter = 'all';   // 'all' | 'active' | 'done'
@@ -70,6 +78,63 @@ function showMessage(text) {
   box.textContent = text;
   document.body.appendChild(box);
   setTimeout(() => box.remove(), 2000);
+}
+
+// ─── 업적 알림 ──────────────────────────────────
+
+function updateAchievementPositions() {
+  activeAchievements.forEach((entry, i) => {
+    entry.el.style.top = (ACHIEVE_TOP_BASE + i * (ACHIEVE_HEIGHT + ACHIEVE_GAP)) + 'px';
+  });
+}
+
+function removeAchievement(entry, immediate) {
+  clearTimeout(entry.timeoutId);
+  const el = entry.el;
+
+  const cleanup = () => {
+    el.remove();
+    activeAchievements = activeAchievements.filter(a => a !== entry);
+    updateAchievementPositions();
+  };
+
+  if (immediate) {
+    cleanup();
+  } else {
+    el.classList.remove('slide-in');
+    el.classList.add('slide-out');
+    setTimeout(cleanup, 400);
+  }
+}
+
+function showAchievement(todo) {
+  if (activeAchievements.length >= MAX_ACHIEVEMENTS) {
+    removeAchievement(activeAchievements[0], true);
+  }
+
+  const bar = document.createElement('div');
+  bar.className = 'achieve-bar';
+  bar.innerHTML = `
+    <div class="achieve-bar-inner">
+      <img src="assets/achieve_bar.png" class="achieve-bar-bg" alt="">
+      <div class="achieve-bar-content">
+        <img src="assets/items/${todo.itemImage}" class="achieve-item-img" alt="">
+        <div class="achieve-text">
+          <div class="achieve-title">${todo.text} 도전과제 달성!</div>
+          <div class="achieve-detail">${todo.text}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(bar);
+
+  const entry = { el: bar, timeoutId: null };
+  activeAchievements.push(entry);
+  updateAchievementPositions();
+
+  requestAnimationFrame(() => requestAnimationFrame(() => bar.classList.add('slide-in')));
+
+  entry.timeoutId = setTimeout(() => removeAchievement(entry, false), 3000);
 }
 
 // ─── 필터 탭 ────────────────────────────────────
@@ -353,11 +418,13 @@ function deleteTodo() {
 /* Todo 완료 */
 function completeTodo() {
   const todo = todos.find(t => t.id === currentTodoId);
-  if (todo) todo.status = 'done';
+  if (todo) {
+    todo.status = 'done';
+    showAchievement(todo);
+  }
 
   renderSlots();
   closeModal();
-  // TODO: 달성 알림(achieve_bar.png) 표시 — 다음 단계에서 구현
 }
 
 // ─── 이벤트 바인딩 ──────────────────────────────

@@ -99,34 +99,33 @@
         </span>
         <input type="range" class="todo-field-range" id="todoPriority" min="0" max="100" value="50">
 
-      </div>
+        <!-- 하단 액션 버튼 (책 안쪽에 절대 위치) -->
+        <div class="todo-modal-buttons">
+          <div class="modal-btn-wrapper" id="btnConfirm">
+            <img src="assets/button.png" alt="" class="modal-btn-bg">
+            <span class="modal-btn-label">확인</span>
+          </div>
+          <div class="modal-btn-wrapper" id="btnEdit">
+            <img src="assets/button.png" alt="" class="modal-btn-bg">
+            <span class="modal-btn-label">수정</span>
+          </div>
+          <div class="modal-btn-wrapper" id="btnDelete">
+            <img src="assets/button.png" alt="" class="modal-btn-bg">
+            <span class="modal-btn-label">삭제</span>
+          </div>
+          <div class="modal-btn-wrapper" id="btnComplete">
+            <img src="assets/button.png" alt="" class="modal-btn-bg">
+            <span class="modal-btn-label">완료</span>
+          </div>
+          <div class="modal-btn-wrapper" id="btnClose">
+            <img src="assets/button.png" alt="" class="modal-btn-bg">
+            <span class="modal-btn-label">닫기</span>
+          </div>
+        </div>
 
-      <!-- 하단 액션 버튼 4개 -->
-      <div class="todo-modal-buttons">
-        <div class="modal-btn-wrapper" id="btnConfirm">
-          <img src="assets/button.png" alt="" class="modal-btn-bg">
-          <span class="modal-btn-label">확인</span>
-        </div>
-        <div class="modal-btn-wrapper" id="btnEdit">
-          <img src="assets/button.png" alt="" class="modal-btn-bg">
-          <span class="modal-btn-label">수정</span>
-        </div>
-        <div class="modal-btn-wrapper" id="btnDelete">
-          <img src="assets/button.png" alt="" class="modal-btn-bg">
-          <span class="modal-btn-label">삭제</span>
-        </div>
-        <div class="modal-btn-wrapper" id="btnComplete">
-          <img src="assets/button.png" alt="" class="modal-btn-bg">
-          <span class="modal-btn-label">완료</span>
-        </div>
-        <div class="modal-btn-wrapper" id="btnClose">
-          <img src="assets/button.png" alt="" class="modal-btn-bg">
-          <span class="modal-btn-label">닫기</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
+      </div><!-- /todo-write-wrapper -->
+    </div><!-- /todo-modal-container -->
+  </div><!-- /todo-modal-overlay -->
 
   <script src="app.js"></script>
 </body>
