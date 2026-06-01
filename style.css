@@ -1,4 +1,15 @@
 /* =============================================
+   폰트 등록: Galmuri11 (마인크래프트 스타일 한글 픽셀 폰트)
+   ============================================= */
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('fonts/Galmuri-v2.40.3/Galmuri11.woff2') format('woff2'),
+       url('fonts/Galmuri-v2.40.3/Galmuri11.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* =============================================
    전체 레이아웃 초기화 및 공통 설정
    ============================================= */
 * {
@@ -58,6 +69,43 @@ body {
   grid-template-columns: repeat(9, 56px);
   grid-template-rows: repeat(3, 56px);
   gap: 7px;
+}
+
+/* =============================================
+   Todo 추가 버튼 래퍼 — 버튼 이미지와 텍스트 라벨을 함께 담는 컨테이너
+   측정 기준 (1467×918 표시 기준):
+     - 시작 위치: (840px, 338px)
+     - 크기: 200×50px
+   ============================================= */
+.add-todo-wrapper {
+  position: absolute;
+  top: 338px;
+  left: 840px;
+  width: 200px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 버튼 배경 이미지 — wrapper를 꽉 채움 */
+.add-todo-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 버튼 위 텍스트 라벨 — 이미지 위에 z-index로 올림 */
+.add-todo-label {
+  position: relative;
+  z-index: 1;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 20px;
+  color: #000000;
+  pointer-events: none; /* 클릭 이벤트는 wrapper가 받도록 */
 }
 
 /* =============================================
