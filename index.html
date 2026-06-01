@@ -12,16 +12,31 @@
     <!-- 배경 이미지 + 슬롯 오버레이를 함께 담는 기준 컨테이너 -->
     <div class="inventory-wrapper">
 
-      <!-- 마인크래프트 인벤토리 배경 이미지 (고정 크기) -->
       <img src="assets/background.jpeg" alt="Minecraft Inventory" class="inventory-bg">
 
-      <!-- Todo 추가 버튼 — 배경 이미지 위에 절대 위치로 배치 -->
+      <!-- Todo 추가 버튼 -->
       <div class="add-todo-wrapper" id="addTodoBtn">
-        <img src="assets/button.png" alt="Add Todo" class="add-todo-btn">
+        <img src="assets/button.png" alt="" class="add-todo-btn">
         <span class="add-todo-label">TODO 추가하기</span>
       </div>
 
-      <!-- 인벤토리 슬롯 27개 (3행 × 9열) — 배경 이미지 위에 position: absolute로 배치 -->
+      <!-- 상태별 필터 탭 (좌측 세로 배치: 전체 / 진행중 / 완료) -->
+      <div class="filter-tabs" id="filterTabs">
+        <div class="filter-tab active" data-filter="all">
+          <img src="assets/button.png" alt="" class="filter-tab-bg">
+          <span class="filter-tab-label">전체</span>
+        </div>
+        <div class="filter-tab" data-filter="active">
+          <img src="assets/button.png" alt="" class="filter-tab-bg">
+          <span class="filter-tab-label">진행중</span>
+        </div>
+        <div class="filter-tab" data-filter="done">
+          <img src="assets/button.png" alt="" class="filter-tab-bg">
+          <span class="filter-tab-label">완료</span>
+        </div>
+      </div>
+
+      <!-- 인벤토리 슬롯 27개 (3행 × 9열) -->
       <div class="inventory-grid" id="inventoryGrid">
         <div class="inventory-slot" data-slot-index="0"></div>
         <div class="inventory-slot" data-slot-index="1"></div>
@@ -50,6 +65,64 @@
         <div class="inventory-slot" data-slot-index="24"></div>
         <div class="inventory-slot" data-slot-index="25"></div>
         <div class="inventory-slot" data-slot-index="26"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 슬롯 호버 툴팁 (마우스 오버 시 Todo 세부 정보 표시) -->
+  <div class="slot-tooltip" id="slotTooltip"></div>
+
+  <!-- Todo 입력/수정 모달 -->
+  <div class="todo-modal-overlay" id="todoModal">
+    <div class="todo-modal-container">
+
+      <!-- todo_write.png 책 배경 + 내부 입력 필드들 -->
+      <div class="todo-write-wrapper">
+        <img src="assets/todo_write.png" alt="" class="todo-write-bg">
+
+        <!-- 제목 -->
+        <span class="todo-field-label" id="labelTitle">제목</span>
+        <input type="text" class="todo-field-input" id="todoTitle" placeholder="할 일 제목">
+
+        <!-- 세부 내용 -->
+        <span class="todo-field-label" id="labelDetail">내용</span>
+        <textarea class="todo-field-textarea" id="todoDetail" placeholder="세부 내용 (선택)"></textarea>
+
+        <!-- 마감 기한 -->
+        <span class="todo-field-label" id="labelDeadline">마감 기한</span>
+        <input type="date" class="todo-field-input" id="todoDeadline">
+
+        <!-- 우선순위 슬라이더 -->
+        <span class="todo-field-label" id="labelPriority">
+          우선순위&nbsp;<span id="priorityValue">50</span>
+        </span>
+        <input type="range" class="todo-field-range" id="todoPriority" min="0" max="100" value="50">
+
+      </div>
+
+      <!-- 하단 액션 버튼 4개 -->
+      <div class="todo-modal-buttons">
+        <div class="modal-btn-wrapper" id="btnConfirm">
+          <img src="assets/button.png" alt="" class="modal-btn-bg">
+          <span class="modal-btn-label">확인</span>
+        </div>
+        <div class="modal-btn-wrapper" id="btnEdit">
+          <img src="assets/button.png" alt="" class="modal-btn-bg">
+          <span class="modal-btn-label">수정</span>
+        </div>
+        <div class="modal-btn-wrapper" id="btnDelete">
+          <img src="assets/button.png" alt="" class="modal-btn-bg">
+          <span class="modal-btn-label">삭제</span>
+        </div>
+        <div class="modal-btn-wrapper" id="btnComplete">
+          <img src="assets/button.png" alt="" class="modal-btn-bg">
+          <span class="modal-btn-label">완료</span>
+        </div>
+        <div class="modal-btn-wrapper" id="btnClose">
+          <img src="assets/button.png" alt="" class="modal-btn-bg">
+          <span class="modal-btn-label">닫기</span>
+        </div>
       </div>
 
     </div>
