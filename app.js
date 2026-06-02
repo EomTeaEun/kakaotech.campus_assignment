@@ -333,7 +333,7 @@ function renderTodoList() {
         return `
           <div class="tl-day-group">
             <div class="tl-day-header${isToday ? ' today' : ''}">${label} · ${filtered.length}개</div>
-            ${filtered.map(renderTodoItem).join('')}
+            ${filtered.map(todo => renderTodoItem(todo, key)).join('')}
           </div>`;
       }).join('');
     }
@@ -628,12 +628,24 @@ inventoryGrid.addEventListener('click', (e) => {
   }
 });
 
-/* 패널 일간/주간 토글 */
+/* 패널 일간/주간 토글 + 주간 아이템 클릭 시 날짜 이동 */
 document.getElementById('todoListPanel').addEventListener('click', (e) => {
   const btn = e.target.closest('.tl-toggle-btn');
-  if (!btn) return;
-  panelViewMode = btn.dataset.mode;
-  renderTodoList();
+  if (btn) {
+    panelViewMode = btn.dataset.mode;
+    renderTodoList();
+    return;
+  }
+
+  if (panelViewMode === 'weekly') {
+    const item = e.target.closest('.tl-item[data-date]');
+    if (!item) return;
+    const [y, m, d] = item.dataset.date.split('-').map(Number);
+    currentViewDate = new Date(y, m - 1, d);
+    panelViewMode = 'daily';
+    updateDateDisplay();
+    renderSlots();
+  }
 });
 
 /* 우선순위 슬라이더 실시간 값 표시 */
