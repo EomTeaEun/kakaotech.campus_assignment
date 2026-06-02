@@ -212,42 +212,52 @@ function renderSlots() {
   const todayKey  = getDateString(currentViewDate);
   const dayTodos  = todos.filter(t => getTodoDateKey(t) === todayKey);
 
-  if (currentFilter === 'done') {
-    dayTodos.filter(t => t.status === 'done').forEach((todo, i) => {
-      const slot = slots[i];
-      if (!slot) return;
-
+  const fillSlot = (slot, todo, isDone) => {
+    if (isDone) {
       slot.classList.add('occupied', 'done-item');
       slot.dataset.todoId = todo.id;
-
-      const img = document.createElement('img');
-      img.src = `assets/items/${todo.itemImage}`;
-      img.alt = todo.text;
-      img.className = 'slot-item-img';
-      slot.appendChild(img);
-
-      const pri = document.createElement('span');
-      pri.className = 'slot-priority';
-      pri.textContent = todo.priority;
-      slot.appendChild(pri);
-    });
-  } else {
-    dayTodos.filter(t => t.status === 'active').forEach(todo => {
-      const slot = slots[todo.slotIndex];
-      if (!slot) return;
-
+    } else {
       slot.classList.add('occupied');
+    }
+    const img = document.createElement('img');
+    img.src = `assets/items/${todo.itemImage}`;
+    img.alt = todo.text;
+    img.className = 'slot-item-img';
+    slot.appendChild(img);
 
-      const img = document.createElement('img');
-      img.src = `assets/items/${todo.itemImage}`;
-      img.alt = todo.text;
-      img.className = 'slot-item-img';
-      slot.appendChild(img);
+    const pri = document.createElement('span');
+    pri.className = 'slot-priority';
+    pri.textContent = todo.priority;
+    slot.appendChild(pri);
+  };
 
-      const pri = document.createElement('span');
-      pri.className = 'slot-priority';
-      pri.textContent = todo.priority;
-      slot.appendChild(pri);
+  if (currentFilter === 'done') {
+    dayTodos.filter(t => t.status === 'done').forEach((todo, i) => {
+      if (slots[i]) fillSlot(slots[i], todo, true);
+    });
+
+  } else if (currentFilter === 'all') {
+    // active → 원래 슬롯 위치
+    const activeTodos = dayTodos.filter(t => t.status === 'active');
+    const occupiedIdx = new Set(activeTodos.map(t => t.slotIndex));
+    activeTodos.forEach(todo => {
+      if (slots[todo.slotIndex]) fillSlot(slots[todo.slotIndex], todo, false);
+    });
+
+    // done → 남은 빈 슬롯에 순서대로 (흑백)
+    let ptr = 0;
+    dayTodos.filter(t => t.status === 'done').forEach(todo => {
+      while (ptr < MAX_SLOTS && occupiedIdx.has(ptr)) ptr++;
+      if (ptr >= MAX_SLOTS) return;
+      fillSlot(slots[ptr], todo, true);
+      occupiedIdx.add(ptr);
+      ptr++;
+    });
+
+  } else {
+    // 'active' 탭: 진행중만
+    dayTodos.filter(t => t.status === 'active').forEach(todo => {
+      if (slots[todo.slotIndex]) fillSlot(slots[todo.slotIndex], todo, false);
     });
   }
 
@@ -313,30 +323,25 @@ function renderTodoList() {
       : `<div class="tl-header">📝 ${filterLabel} (${filtered.length})</div>${filtered.map(renderTodoItem).join('')}`;
 
   } else {
-    const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+    const DAY_NAMES  = ['일', '월', '화', '수', '목', '금', '토'];
     const realTodayKey = getDateString(new Date());
 
-    const groups = getWeekDays(currentViewDate)
-      .map(day => {
-        const key      = getDateString(day);
-        const filtered = filterTodos(todos.filter(t => getTodoDateKey(t) === key));
-        return { day, key, filtered };
-      })
-      .filter(g => g.filtered.length > 0);
-
-    if (groups.length === 0) {
-      contentHTML = `<div class="tl-empty">이번 주 할 일 없음</div>`;
-    } else {
-      contentHTML = groups.map(({ day, key, filtered }) => {
-        const isToday  = key === realTodayKey;
-        const label    = `${day.getMonth() + 1}월 ${day.getDate()}일 (${DAY_NAMES[day.getDay()]})`;
-        return `
-          <div class="tl-day-group">
-            <div class="tl-day-header${isToday ? ' today' : ''}">${label} · ${filtered.length}개</div>
-            ${filtered.map(todo => renderTodoItem(todo, key)).join('')}
-          </div>`;
-      }).join('');
-    }
+    contentHTML = getWeekDays(currentViewDate).map(day => {
+      const key      = getDateString(day);
+      const filtered = filterTodos(todos.filter(t => getTodoDateKey(t) === key));
+      const isToday  = key === realTodayKey;
+      const label    = `${day.getMonth() + 1}월 ${day.getDate()}일 (${DAY_NAMES[day.getDay()]})`;
+      const items    = filtered.length === 0
+        ? `<div class="tl-empty tl-empty-week">todo가 없습니다</div>`
+        : filtered.map(todo => renderTodoItem(todo, key)).join('');
+      return `
+        <div class="tl-day-group">
+          <div class="tl-day-header${isToday ? ' today' : ''}" data-date="${key}" style="cursor:pointer">
+            ${label} · ${filtered.length}개
+          </div>
+          ${items}
+        </div>`;
+    }).join('');
   }
 
   panel.innerHTML = toggleHTML + contentHTML;
@@ -638,11 +643,11 @@ document.getElementById('todoListPanel').addEventListener('click', (e) => {
   }
 
   if (panelViewMode === 'weekly') {
-    const item = e.target.closest('.tl-item[data-date]');
-    if (!item) return;
-    const [y, m, d] = item.dataset.date.split('-').map(Number);
+    const target = e.target.closest('.tl-day-header[data-date], .tl-item[data-date]');
+    if (!target) return;
+    const [y, m, d] = target.dataset.date.split('-').map(Number);
     currentViewDate = new Date(y, m - 1, d);
-    panelViewMode = 'daily';
+    panelViewMode   = 'daily';
     updateDateDisplay();
     renderSlots();
   }
