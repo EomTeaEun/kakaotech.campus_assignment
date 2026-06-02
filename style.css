@@ -54,7 +54,7 @@ body {
 .date-nav {
   position: absolute;
   top: 295px;
-  left: 842px;
+  left: 841px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -138,9 +138,23 @@ body {
 }
 
 .inventory-slot {
+  position: relative;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.35);
   cursor: default;
+}
+
+.slot-priority {
+  position: absolute;
+  bottom: 2px;
+  right: 3px;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+  line-height: 1;
+  z-index: 1;
 }
 
 .inventory-slot.occupied {

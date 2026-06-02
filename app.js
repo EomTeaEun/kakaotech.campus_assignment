@@ -109,6 +109,21 @@ function showMessage(text) {
   setTimeout(() => box.remove(), 2000);
 }
 
+// ─── localStorage ───────────────────────────────
+
+function saveTodos() {
+  localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function loadTodos() {
+  try {
+    const raw = localStorage.getItem('todos');
+    todos = raw ? JSON.parse(raw) : [];
+  } catch {
+    todos = [];
+  }
+}
+
 // ─── 업적 알림 ──────────────────────────────────
 
 function updateAchievementPositions() {
@@ -206,6 +221,11 @@ function renderSlots() {
       img.alt = todo.text;
       img.className = 'slot-item-img';
       slot.appendChild(img);
+
+      const pri = document.createElement('span');
+      pri.className = 'slot-priority';
+      pri.textContent = todo.priority;
+      slot.appendChild(pri);
     });
   } else {
     dayTodos.filter(t => t.status === 'active').forEach(todo => {
@@ -219,6 +239,11 @@ function renderSlots() {
       img.alt = todo.text;
       img.className = 'slot-item-img';
       slot.appendChild(img);
+
+      const pri = document.createElement('span');
+      pri.className = 'slot-priority';
+      pri.textContent = todo.priority;
+      slot.appendChild(pri);
     });
   }
 }
@@ -346,8 +371,8 @@ function openModal(mode, todoId = null) {
     titleInput.value           = '';
     detailInput.value          = '';
     deadlineInput.value        = '';
-    prioritySlider.value       = 50;
-    priorityValue.textContent  = '50';
+    prioritySlider.value       = 32;
+    priorityValue.textContent  = '32';
     setFieldsEditable(true);
     setTimeout(() => titleInput.focus(), 50);
   } else {
@@ -357,8 +382,8 @@ function openModal(mode, todoId = null) {
     titleInput.value           = todo.text;
     detailInput.value          = todo.detail   || '';
     deadlineInput.value        = todo.deadline || '';
-    prioritySlider.value       = todo.priority ?? 50;
-    priorityValue.textContent  = todo.priority ?? 50;
+    prioritySlider.value       = todo.priority ?? 32;
+    priorityValue.textContent  = todo.priority ?? 32;
     setFieldsEditable(false);
   }
 
@@ -402,6 +427,8 @@ function addTodo() {
     createdAt: getDateString(currentViewDate)
   });
 
+  saveTodos();
+
   // 완료 탭에서 추가하면 진행중 탭으로 전환
   if (currentFilter === 'done') {
     setFilter('active');
@@ -437,6 +464,7 @@ function saveEdit() {
     todo.priority = parseInt(prioritySlider.value);
   }
 
+  saveTodos();
   renderSlots();
   closeModal();
 }
@@ -444,6 +472,7 @@ function saveEdit() {
 /* Todo 삭제 */
 function deleteTodo() {
   todos = todos.filter(t => t.id !== currentTodoId);
+  saveTodos();
   renderSlots();
   closeModal();
 }
@@ -456,6 +485,7 @@ function completeTodo() {
     showAchievement(todo);
   }
 
+  saveTodos();
   renderSlots();
   closeModal();
 }
@@ -532,5 +562,6 @@ document.getElementById('dateNext').addEventListener('click', () => {
 });
 
 // ─── 초기화 ─────────────────────────────────────
+loadTodos();
 updateDateDisplay();
-renderSlots();
+setFilter('active'); // 복원 후 진행중 탭으로 시작
