@@ -230,6 +230,108 @@ body {
 }
 
 /* =============================================
+   상시 Todo 목록 패널
+   기준: 1467×918, 좌상단 (1161, 379)
+   ============================================= */
+.todo-list-panel {
+  position: absolute;
+  top: 379px;
+  left: 1120px;
+  width: 284px;
+  max-height: 510px;
+  background: rgba(16, 8, 0, 0.88);
+  border: 2px solid #7a6850;
+  color: #f0e0c8;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 11px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  line-height: 1.8;
+  z-index: 10;
+}
+
+.todo-list-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.todo-list-panel::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.3);
+}
+
+.todo-list-panel::-webkit-scrollbar-thumb {
+  background: #7a6850;
+}
+
+.tl-header {
+  font-size: 12px;
+  color: #ffe090;
+  border-bottom: 1px solid #5a4030;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.tl-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 1px 0;
+  border-bottom: 1px solid rgba(90, 64, 48, 0.3);
+}
+
+.tl-item:last-child {
+  border-bottom: none;
+}
+
+.tl-icon-img {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.tl-name-wrap {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tl-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f0e0c8;
+}
+
+.tl-title.done {
+  color: #888;
+  text-decoration: line-through;
+}
+
+.tl-priority {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #ffe090;
+}
+
+.tl-deadline {
+  flex-shrink: 0;
+  font-size: 9px;
+  color: #a09080;
+  white-space: nowrap;
+}
+
+.tl-empty {
+  color: #6a5a48;
+  font-size: 11px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* =============================================
    슬롯 호버 툴팁
    ============================================= */
 .slot-tooltip {

@@ -62,9 +62,12 @@ function getRandomItemImage() {
   return ITEM_IMAGES[Math.floor(Math.random() * ITEM_IMAGES.length)];
 }
 
-/* Date → "2025-06-01" 형식 문자열 */
+/* Date → "2025-06-01" 형식 문자열 (로컬 타임존 기준) */
 function getDateString(date) {
-  return date.toISOString().split('T')[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 /* Date → "2025년 6월 1일" 한국어 표기 */
@@ -246,6 +249,50 @@ function renderSlots() {
       slot.appendChild(pri);
     });
   }
+
+  renderTodoList();
+}
+
+// ─── 상시 Todo 목록 패널 ─────────────────────────
+
+function renderTodoList() {
+  const panel = document.getElementById('todoListPanel');
+  const todayKey  = getDateString(currentViewDate);
+  const dayTodos  = todos.filter(t => getTodoDateKey(t) === todayKey);
+
+  const filtered = (currentFilter === 'done'
+    ? dayTodos.filter(t => t.status === 'done')
+    : dayTodos.filter(t => t.status === 'active')
+  ).sort((a, b) => b.priority - a.priority);
+
+  if (filtered.length === 0) {
+    panel.innerHTML = `<div class="tl-empty">할 일 없음</div>`;
+    return;
+  }
+
+  const filterLabel = currentFilter === 'done' ? '완료' : currentFilter === 'active' ? '진행중' : '전체';
+
+  const items = filtered.map(todo => {
+    const doneClass = todo.status === 'done' ? ' done' : '';
+    const imgStyle  = todo.status === 'done' ? ' style="filter:grayscale(100%);opacity:0.6"' : '';
+    const deadline  = todo.deadline
+      ? `<span class="tl-deadline">~${todo.deadline}</span>`
+      : '';
+    return `
+      <div class="tl-item">
+        <img src="assets/items/${todo.itemImage}" class="tl-icon-img"${imgStyle}>
+        <div class="tl-name-wrap">
+          <span class="tl-title${doneClass}">${todo.text}</span>
+          ${deadline}
+        </div>
+        <span class="tl-priority">${todo.priority}</span>
+      </div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="tl-header">📝 ${filterLabel} (${filtered.length})</div>
+    ${items}
+  `;
 }
 
 // ─── 슬롯 호버 툴팁 ─────────────────────────────
@@ -331,12 +378,12 @@ function updateModalButtons() {
     btnDelete.style.display   = 'flex';
     btnComplete.style.display = 'none';
   } else if (isEditingText) {
-    // 수정 입력 중: 확인 + 닫기 + 삭제 + 완료
+    // 수정 입력 중: 확인만
     btnConfirm.style.display  = 'flex';
-    btnClose.style.display    = 'flex';
+    btnClose.style.display    = 'none';
     btnEdit.style.display     = 'none';
-    btnDelete.style.display   = 'flex';
-    btnComplete.style.display = 'flex';
+    btnDelete.style.display   = 'none';
+    btnComplete.style.display = 'none';
   } else {
     // 보기 모드: 닫기 + 수정 + 삭제 + 완료
     btnConfirm.style.display  = 'none';
@@ -349,7 +396,7 @@ function updateModalButtons() {
   // 보이는 버튼이 2개일 때 two-btn 클래스 적용
   const visibleCount = [btnConfirm, btnClose, btnEdit, btnDelete, btnComplete]
     .filter(btn => btn.style.display === 'flex').length;
-  modalButtons.classList.toggle('two-btn', visibleCount === 2);
+  modalButtons.classList.toggle('two-btn', visibleCount <= 2);
 }
 
 // ─── 모달 열기/닫기 ─────────────────────────────
@@ -367,10 +414,12 @@ function openModal(mode, todoId = null) {
   currentTodoId = todoId;
   isEditingText = false;
 
+  deadlineInput.min = getDateString(new Date()); // 오늘 이전 날짜 선택 불가
+
   if (mode === 'add') {
     titleInput.value           = '';
     detailInput.value          = '';
-    deadlineInput.value        = '';
+    deadlineInput.value        = getDateString(currentViewDate);
     prioritySlider.value       = 32;
     priorityValue.textContent  = '32';
     setFieldsEditable(true);
