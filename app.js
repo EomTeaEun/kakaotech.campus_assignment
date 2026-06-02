@@ -32,6 +32,7 @@ let currentFilter = 'all';   // 'all' | 'active' | 'done'
 let modalMode     = 'add';   // 'add' | 'edit' | 'done-view'
 let currentTodoId = null;
 let isEditingText = false;   // edit 모드에서 수정 버튼 눌렀는지
+let panelViewMode = 'daily'; // 'daily' | 'weekly'
 
 // ─── DOM 캐싱 ────────────────────────────────────
 // (날짜 관련 DOM은 하단 이벤트 바인딩 섹션에서 캐싱)
@@ -255,44 +256,90 @@ function renderSlots() {
 
 // ─── 상시 Todo 목록 패널 ─────────────────────────
 
+/* todo 한 행 HTML 생성 / dateKey: 주간 뷰에서 날짜 이동용 */
+function renderTodoItem(todo, dateKey = '') {
+  const doneClass   = todo.status === 'done' ? ' done' : '';
+  const imgStyle    = todo.status === 'done' ? ' style="filter:grayscale(100%);opacity:0.6"' : '';
+  const deadline    = todo.deadline ? `<span class="tl-deadline">~${todo.deadline}</span>` : '';
+  const dateAttr    = dateKey ? ` data-date="${dateKey}"` : '';
+  const cursorStyle = dateKey ? ' style="cursor:pointer"' : '';
+  return `
+    <div class="tl-item"${dateAttr}${cursorStyle}>
+      <img src="assets/items/${todo.itemImage}" class="tl-icon-img"${imgStyle}>
+      <div class="tl-name-wrap">
+        <span class="tl-title${doneClass}">${todo.text}</span>
+        ${deadline}
+      </div>
+      <span class="tl-priority">${todo.priority}</span>
+    </div>`;
+}
+
+/* currentViewDate가 속한 주의 월~일 Date 배열 반환 */
+function getWeekDays(date) {
+  const d   = new Date(date);
+  const day = d.getDay(); // 0=일
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return Array.from({ length: 7 }, (_, i) => {
+    const dd = new Date(mon);
+    dd.setDate(mon.getDate() + i);
+    return dd;
+  });
+}
+
 function renderTodoList() {
   const panel = document.getElementById('todoListPanel');
-  const todayKey  = getDateString(currentViewDate);
-  const dayTodos  = todos.filter(t => getTodoDateKey(t) === todayKey);
 
-  const filtered = (currentFilter === 'done'
-    ? dayTodos.filter(t => t.status === 'done')
-    : dayTodos.filter(t => t.status === 'active')
+  const toggleHTML = `
+    <div class="tl-toggle">
+      <span class="tl-toggle-btn${panelViewMode === 'daily'  ? ' active' : ''}" data-mode="daily">일간</span>
+      <span class="tl-toggle-btn${panelViewMode === 'weekly' ? ' active' : ''}" data-mode="weekly">주간</span>
+    </div>`;
+
+  const filterTodos = (list) => (currentFilter === 'done'
+    ? list.filter(t => t.status === 'done')
+    : list.filter(t => t.status === 'active')
   ).sort((a, b) => b.priority - a.priority);
 
-  if (filtered.length === 0) {
-    panel.innerHTML = `<div class="tl-empty">할 일 없음</div>`;
-    return;
+  let contentHTML = '';
+
+  if (panelViewMode === 'daily') {
+    const todayKey = getDateString(currentViewDate);
+    const filtered = filterTodos(todos.filter(t => getTodoDateKey(t) === todayKey));
+    const filterLabel = currentFilter === 'done' ? '완료' : currentFilter === 'active' ? '진행중' : '전체';
+
+    contentHTML = filtered.length === 0
+      ? `<div class="tl-empty">할 일 없음</div>`
+      : `<div class="tl-header">📝 ${filterLabel} (${filtered.length})</div>${filtered.map(renderTodoItem).join('')}`;
+
+  } else {
+    const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+    const realTodayKey = getDateString(new Date());
+
+    const groups = getWeekDays(currentViewDate)
+      .map(day => {
+        const key      = getDateString(day);
+        const filtered = filterTodos(todos.filter(t => getTodoDateKey(t) === key));
+        return { day, key, filtered };
+      })
+      .filter(g => g.filtered.length > 0);
+
+    if (groups.length === 0) {
+      contentHTML = `<div class="tl-empty">이번 주 할 일 없음</div>`;
+    } else {
+      contentHTML = groups.map(({ day, key, filtered }) => {
+        const isToday  = key === realTodayKey;
+        const label    = `${day.getMonth() + 1}월 ${day.getDate()}일 (${DAY_NAMES[day.getDay()]})`;
+        return `
+          <div class="tl-day-group">
+            <div class="tl-day-header${isToday ? ' today' : ''}">${label} · ${filtered.length}개</div>
+            ${filtered.map(renderTodoItem).join('')}
+          </div>`;
+      }).join('');
+    }
   }
 
-  const filterLabel = currentFilter === 'done' ? '완료' : currentFilter === 'active' ? '진행중' : '전체';
-
-  const items = filtered.map(todo => {
-    const doneClass = todo.status === 'done' ? ' done' : '';
-    const imgStyle  = todo.status === 'done' ? ' style="filter:grayscale(100%);opacity:0.6"' : '';
-    const deadline  = todo.deadline
-      ? `<span class="tl-deadline">~${todo.deadline}</span>`
-      : '';
-    return `
-      <div class="tl-item">
-        <img src="assets/items/${todo.itemImage}" class="tl-icon-img"${imgStyle}>
-        <div class="tl-name-wrap">
-          <span class="tl-title${doneClass}">${todo.text}</span>
-          ${deadline}
-        </div>
-        <span class="tl-priority">${todo.priority}</span>
-      </div>`;
-  }).join('');
-
-  panel.innerHTML = `
-    <div class="tl-header">📝 ${filterLabel} (${filtered.length})</div>
-    ${items}
-  `;
+  panel.innerHTML = toggleHTML + contentHTML;
 }
 
 // ─── 슬롯 호버 툴팁 ─────────────────────────────
@@ -579,6 +626,14 @@ inventoryGrid.addEventListener('click', (e) => {
     if (!todo) return;
     openModal('edit', todo.id);
   }
+});
+
+/* 패널 일간/주간 토글 */
+document.getElementById('todoListPanel').addEventListener('click', (e) => {
+  const btn = e.target.closest('.tl-toggle-btn');
+  if (!btn) return;
+  panelViewMode = btn.dataset.mode;
+  renderTodoList();
 });
 
 /* 우선순위 슬라이더 실시간 값 표시 */

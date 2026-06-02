@@ -238,7 +238,7 @@ body {
   top: 379px;
   left: 1120px;
   width: 284px;
-  max-height: 510px;
+  max-height: 398px; /* 284 × 1.4 */
   background: rgba(16, 8, 0, 0.88);
   border: 2px solid #7a6850;
   color: #f0e0c8;
@@ -262,12 +262,59 @@ body {
   background: #7a6850;
 }
 
+/* 일간/주간 토글 */
+.tl-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 7px;
+}
+
+.tl-toggle-btn {
+  flex: 1;
+  text-align: center;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 10px;
+  color: #7a6850;
+  border: 1px solid #5a4030;
+  padding: 2px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tl-toggle-btn.active {
+  color: #ffe090;
+  border-color: #7a6850;
+  background: rgba(122, 104, 80, 0.2);
+}
+
 .tl-header {
   font-size: 12px;
   color: #ffe090;
   border-bottom: 1px solid #5a4030;
   padding-bottom: 4px;
   margin-bottom: 6px;
+}
+
+/* 주간 뷰 날짜 그룹 */
+.tl-day-group {
+  margin-bottom: 6px;
+}
+
+.tl-day-group:last-child {
+  margin-bottom: 0;
+}
+
+.tl-day-header {
+  font-size: 10px;
+  color: #a09080;
+  border-bottom: 1px solid #3a2a1a;
+  padding-bottom: 2px;
+  margin-bottom: 3px;
+}
+
+.tl-day-header.today {
+  color: #ffe090;
+  border-color: #5a4030;
 }
 
 .tl-item {
