@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "./styles/minecraft.css";
+
+/* Tailwind preflight의 img { max-width: 100% } 이 배경 이미지를 뷰포트에 맞게 축소시켜
+   오버레이 위치가 어긋나는 것을 방지. minecraft.css 픽셀값은 1467px 기준이므로 고정. */
+.inventory-bg {
+  max-width: none;
+}

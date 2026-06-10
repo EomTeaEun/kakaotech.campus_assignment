@@ -1,0 +1,724 @@
+/* =============================================
+   폰트 등록: Galmuri11 (마인크래프트 스타일 한글 픽셀 폰트)
+   ============================================= */
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('/fonts/Galmuri-v2.40.3/Galmuri11.woff2') format('woff2'),
+       url('/fonts/Galmuri-v2.40.3/Galmuri11.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* =============================================
+   전체 레이아웃
+   ============================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* =============================================
+   인벤토리 래퍼 — 배경 이미지와 슬롯의 position 기준
+   ============================================= */
+.inventory-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.inventory-bg {
+  display: block;
+  width: 1467px;
+  height: auto;
+}
+
+/* =============================================
+   날짜 네비게이션
+   추가 버튼(top:338, left:840, w:200) 바로 위에 중앙 정렬
+   ============================================= */
+.date-nav {
+  position: absolute;
+  top: 295px;
+  left: 841px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.date-nav-btn {
+  position: relative;
+  width: 36px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-nav-btn-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: fill;
+}
+
+.date-nav-btn-label {
+  position: relative;
+  z-index: 1;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 14px;
+  color: #000;
+  pointer-events: none;
+}
+
+.date-text {
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 15px;
+  color: #000;
+  white-space: nowrap;
+}
+
+/* =============================================
+   TODO 추가 버튼
+   ============================================= */
+.add-todo-wrapper {
+  position: absolute;
+  top: 338px;
+  left: 840px;
+  width: 200px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-todo-btn {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+
+.add-todo-label {
+  position: relative;
+  z-index: 1;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 20px;
+  color: #000;
+  pointer-events: none;
+}
+
+/* =============================================
+   인벤토리 슬롯 그리드 (3행 × 9열)
+   기준: 1467×918, 시작: (421, 409), 슬롯: 56px, gap: 7px
+   ============================================= */
+.inventory-grid {
+  position: absolute;
+  top: 409px;
+  left: 421px;
+  display: grid;
+  grid-template-columns: repeat(9, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 7px;
+}
+
+.inventory-slot {
+  position: relative;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: default;
+}
+
+.slot-priority {
+  position: absolute;
+  bottom: 2px;
+  right: 3px;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+  line-height: 1;
+  z-index: 1;
+}
+
+.inventory-slot.occupied {
+  cursor: pointer;
+}
+
+.slot-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+  pointer-events: none;
+}
+
+/* 완료된 아이템 — 흑백 처리 */
+.inventory-slot.done-item .slot-item-img {
+  filter: grayscale(100%);
+  opacity: 0.8;
+}
+
+/* =============================================
+   필터 탭 (전체 / 진행중 / 완료) — 좌측 세로 배치
+   인벤토리 그리드 중앙 기준 수직 정렬
+   ============================================= */
+.filter-tabs {
+  position: absolute;
+  top: 435px;   /* 그리드 중앙 (409 + 182/2 - 130/2 ≈ 435) */
+  left: 195px;  /* 인벤토리 패널 좌측 어두운 영역 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-tab {
+  position: relative;
+  width: 116px;
+  height: 38px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: opacity 0.1s;
+}
+
+.filter-tab:hover {
+  opacity: 0.85;
+}
+
+.filter-tab.active {
+  opacity: 1;
+}
+
+.filter-tab-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+
+.filter-tab-label {
+  position: relative;
+  z-index: 1;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 15px;
+  color: #2a1a00;
+  pointer-events: none;
+}
+
+/* 활성 탭 라벨 강조 */
+.filter-tab.active .filter-tab-label {
+  color: #000;
+}
+
+/* =============================================
+   상시 Todo 목록 패널
+   기준: 1467×918, 좌상단 (1161, 379)
+   ============================================= */
+.todo-list-panel {
+  position: absolute;
+  top: 329px;
+  left: 1120px;
+  width: 284px;
+  max-height: 398px; /* 284 × 1.4 */
+  background: rgba(16, 8, 0, 0.88);
+  border: 2px solid #7a6850;
+  color: #f0e0c8;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 11px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  line-height: 1.8;
+  z-index: 10;
+}
+
+.todo-list-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.todo-list-panel::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.3);
+}
+
+.todo-list-panel::-webkit-scrollbar-thumb {
+  background: #7a6850;
+}
+
+/* 일간/주간 토글 */
+.tl-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 7px;
+}
+
+.tl-toggle-btn {
+  flex: 1;
+  text-align: center;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 10px;
+  color: #7a6850;
+  border: 1px solid #5a4030;
+  padding: 2px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tl-toggle-btn.active {
+  color: #ffe090;
+  border-color: #7a6850;
+  background: rgba(122, 104, 80, 0.2);
+}
+
+.tl-header {
+  font-size: 12px;
+  color: #ffe090;
+  border-bottom: 1px solid #5a4030;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+/* 주간 뷰 날짜 그룹 */
+.tl-day-group {
+  margin-bottom: 6px;
+}
+
+.tl-day-group:last-child {
+  margin-bottom: 0;
+}
+
+.tl-day-header {
+  font-size: 10px;
+  color: #a09080;
+  border-bottom: 1px solid #3a2a1a;
+  padding-bottom: 2px;
+  margin-bottom: 3px;
+}
+
+.tl-day-header.today {
+  color: #ffe090;
+  border-color: #5a4030;
+}
+
+.tl-day-header:hover {
+  color: #fff;
+}
+
+.tl-empty-week {
+  font-size: 10px;
+  padding: 0;
+  text-align: left;
+}
+
+.tl-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 1px 0;
+  border-bottom: 1px solid rgba(90, 64, 48, 0.3);
+}
+
+.tl-item:last-child {
+  border-bottom: none;
+}
+
+.tl-icon-img {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.tl-name-wrap {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tl-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f0e0c8;
+}
+
+.tl-title.done {
+  color: #888;
+  text-decoration: line-through;
+}
+
+.tl-priority {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #ffe090;
+}
+
+.tl-deadline {
+  flex-shrink: 0;
+  font-size: 9px;
+  color: #a09080;
+  white-space: nowrap;
+}
+
+.tl-empty {
+  color: #6a5a48;
+  font-size: 11px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* =============================================
+   슬롯 호버 툴팁
+   ============================================= */
+.slot-tooltip {
+  display: none;
+  position: fixed;
+  background: rgba(16, 8, 0, 0.94);
+  border: 2px solid #7a6850;
+  color: #f0e0c8;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 12px;
+  padding: 8px 12px;
+  pointer-events: none;
+  z-index: 50;
+  min-width: 160px;
+  max-width: 260px;
+  line-height: 1.9;
+}
+
+.tooltip-title {
+  font-size: 13px;
+  color: #ffe090;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #5a4030;
+}
+
+.tooltip-row {
+  color: #d0c0a8;
+  font-size: 11px;
+}
+
+/* =============================================
+   Todo 모달 오버레이
+   ============================================= */
+.todo-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.todo-modal-overlay.active {
+  display: flex;
+}
+
+.todo-modal-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* =============================================
+   todo_write.png 책 래퍼 — 내부 필드들의 position 기준
+   원본: 294×361px, 2배 표시: 588×722px (픽셀아트 정수 배율)
+   내부 쓰기 영역 (2x 기준):
+     left: 84px, top: 110px, width: 464px, height: 516px
+   ============================================= */
+.todo-write-wrapper {
+  position: relative;
+  width: 588px;
+  height: 722px;
+}
+
+.todo-write-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  image-rendering: pixelated;
+}
+
+/* ─── 공통 필드 라벨 ─── */
+.todo-field-label {
+  position: absolute;
+  left: 85px;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 13px;
+  color: #5a4030;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ─── 각 라벨 top 위치 (2x 기준) ─── */
+#labelTitle    { top: 110px; }
+#labelDetail   { top: 152px; }
+#labelDeadline { top: 278px; }
+#labelPriority { top: 350px; }
+
+/* ─── 공통 텍스트 입력 스타일 ─── */
+.todo-field-input {
+  position: absolute;
+  left: 85px;
+  width: 420px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(120, 90, 60, 0.45);
+  outline: none;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 13px;
+  color: #3a2a1a;
+  padding: 2px 4px;
+  z-index: 1;
+}
+
+/* ─── 각 input top 위치 ─── */
+#todoTitle    { top: 128px; height: 24px; }
+#todoDeadline { top: 296px; height: 24px; cursor: pointer; }
+
+/* 날짜 입력 내부 텍스트도 Galmuri11 적용 */
+#todoDeadline::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+/* ─── 세부 내용 textarea ─── */
+.todo-field-textarea {
+  position: absolute;
+  left: 85px;
+  top: 170px;
+  width: 420px;
+  height: 100px;
+  background: rgba(255, 252, 240, 0.25);
+  border: 3px solid rgba(120, 90, 60, 0.35);
+  outline: none;
+  resize: none;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 13px;
+  color: #3a2a1a;
+  line-height: 1.6;
+  padding: 4px 6px;
+  z-index: 1;
+}
+
+.todo-field-textarea::placeholder,
+.todo-field-input::placeholder {
+  color: #b8a888;
+}
+
+/* 읽기 전용일 때 커서 */
+.todo-field-input[readonly],
+.todo-field-textarea[readonly] {
+  cursor: default;
+}
+
+/* ─── 우선순위 슬라이더 ─── */
+.todo-field-range {
+  position: absolute;
+  left: 99px;
+  top: 372px;
+  width: 400px;
+  height: 22px;
+  z-index: 1;
+  cursor: pointer;
+  accent-color: #8b6914;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+}
+
+.todo-field-range::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #c8b080;
+  border-radius: 0;
+}
+
+.todo-field-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  background: #5a3a10;
+  border: 2px solid #3a2000;
+  cursor: pointer;
+}
+
+.todo-field-range:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* =============================================
+   모달 하단 버튼 — 책 안쪽 하단에 절대 위치
+   책(588×722px) 기준: 슬라이더 하단(~400px) 아래 여백 활용
+   ============================================= */
+.todo-modal-buttons {
+  position: absolute;
+  bottom: 80px;
+  left: 85px;
+  width: 420px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modal-btn-wrapper {
+  position: relative;
+  width: 78px;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-btn-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: fill;
+}
+
+.modal-btn-label {
+  position: relative;
+  z-index: 1;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 12px;
+  color: #2a1a00;
+  pointer-events: none;
+}
+
+/* 버튼 2개일 때 1.3배 확대 */
+.todo-modal-buttons.two-btn .modal-btn-wrapper {
+  width: 102px;
+  height: 34px;
+}
+
+.todo-modal-buttons.two-btn .modal-btn-label {
+  font-size: 14px;
+}
+
+/* =============================================
+   안내 메시지 박스
+   ============================================= */
+.message-box {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.92);
+  color: #fff;
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 14px;
+  padding: 10px 22px;
+  border: 2px solid #888;
+  z-index: 200;
+  white-space: nowrap;
+}
+
+/* =============================================
+   업적 알림 바
+   ============================================= */
+.achieve-bar {
+  position: fixed;
+  right: 20px;
+  width: 360px;
+  z-index: 300;
+  transform: translateX(calc(100% + 20px));
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              top 0.2s ease;
+}
+
+.achieve-bar.slide-in {
+  transform: translateX(0);
+}
+
+.achieve-bar.slide-out {
+  transform: translateX(calc(100% + 20px));
+}
+
+.achieve-bar-inner {
+  position: relative;
+}
+
+.achieve-bar-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.achieve-bar-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+}
+
+.achieve-item-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.achieve-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.achieve-title {
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 11px;
+  color: #FFFF55;
+  text-shadow: 2px 2px 0 #3f3f00;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.achieve-detail {
+  font-family: 'Galmuri11', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 2px 2px 0 #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
