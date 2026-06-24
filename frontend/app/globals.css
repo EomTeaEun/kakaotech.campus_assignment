@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@import "./styles/minecraft.css";
+
+/* Tailwind preflight의 img { max-width: 100% } 이 배경 이미지를 뷰포트에 맞게 축소시켜
+   오버레이 위치가 어긋나는 것을 방지. minecraft.css 픽셀값은 1467px 기준이므로 고정. */
+.inventory-bg {
+  max-width: none;
+}
+
+/* 도전2: 서버 기반 검색 — 2차에는 없던 신규 UI라 minecraft.css(Figma 픽셀값)는
+   건드리지 않고 filter-tabs(top:435, left:195, height:130) 바로 아래에 추가. */
+.search-input-wrapper {
+  position: absolute;
+  top: 581px;
+  left: 195px;
+  width: 116px;
+}
+
+.search-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  font-family: "Galmuri11", sans-serif;
+  font-size: 13px;
+  color: #2a1a00;
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px solid #2a1a00;
+  border-radius: 2px;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #6b5a3a;
+}
